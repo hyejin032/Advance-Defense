@@ -40,6 +40,15 @@ public class PlayerMovement : MonoBehaviour
     void Move()
     {
         inputVec.x = Input.GetAxisRaw("Horizontal");
+        if (inputVec.x > 0)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 0.6f, enemyLayer);
+            if (hit.collider != null)
+            {
+                // 왼쪽에 적이 있으면 이동 금지
+                inputVec.x = 0;
+            }
+        }
         float newX = transform.position.x + inputVec.x * Playerspeed * Time.deltaTime;
         float minX = -7f;
         float maxX = 7f;
@@ -80,7 +89,24 @@ public class PlayerMovement : MonoBehaviour
             Cooldown = 0f;
         }
     }
+    public void TakeDamage(int damage)
+    {
+        PlayerHp -= damage;
+        if (PlayerHp > 0)
+        {
+            anim.SetTrigger("doHit");
+        }
+        if (PlayerHp <= 0)
+        {
+            Die();
+        }
+    }
 
+    void Die()
+    {
+        anim.SetTrigger("doDie");
+        Destroy(this, 1);
+    }
     void LateUpdate()
     {
         if (inputVec.x != 0)
@@ -93,7 +119,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (attackPoint != null)
         {
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(attackPoint.position, AttackRange);
         }
     }
